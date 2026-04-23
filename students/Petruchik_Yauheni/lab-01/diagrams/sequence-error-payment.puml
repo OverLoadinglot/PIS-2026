@@ -1,0 +1,31 @@
+@startuml sequence-error-payment
+title Ошибка: Превышение лимита категории (Error Case)
+skinparam maxMessageSize 150
+
+actor "Член семьи" as User
+participant "WebApp UI" as UI
+participant "Budget API" as API
+participant "Database" as DB
+
+User -> UI: Ввод суммы (очень большой)
+activate UI
+
+UI -> API: POST /api/expenses\n(amount=50000)
+activate API
+
+API -> DB: SELECT limit, spent FROM categories
+activate DB
+DB --> API: limit=20000, spent=15000
+deactivate DB
+
+note right of API
+  Проверка: 15000 + 50000 > 20000
+  Лимит превышен!
+end note
+
+API --> UI: 400 Bad Request\n{"error": "Limit_Exceeded"}
+deactivate API
+
+UI --> User: "Ошибка: Превышен лимит по категории!"
+deactivate UI
+@enduml

@@ -1,0 +1,7 @@
+Миграции Alembic для лабораторной 5.
+
+Команда для генерации миграции:
+    alembic revision --autogenerate -m "create budgets table"
+
+Команда для применения:
+    alembic upgrade head

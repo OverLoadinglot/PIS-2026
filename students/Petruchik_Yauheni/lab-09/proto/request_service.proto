@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package budget;
+
+service BudgetService {
+  rpc CreateBudgetEntry(CreateBudgetEntryRequest) returns (BudgetEntryResponse);
+  rpc GetBudgetEntry(GetBudgetEntryRequest) returns (BudgetEntryResponse);
+  rpc ListBudgetEntries(ListBudgetEntriesRequest) returns (ListBudgetEntriesResponse);
+  rpc ActivateBudgetEntry(ActivateBudgetEntryRequest) returns (BudgetEntryResponse);
+  rpc StreamActiveBudgetEntries(StreamActiveBudgetEntriesRequest) returns (stream BudgetEntryResponse);
+}
+
+message BudgetEntry {
+  string entry_id = 1;
+  string budget_id = 2;
+  string member_id = 3;
+  string category_id = 4;
+  double amount = 5;
+  string currency = 6;
+  string type = 7;
+  string description = 8;
+  string status = 9;
+}
+
+message CreateBudgetEntryRequest {
+  string entry_id = 1;
+  string budget_id = 2;
+  string member_id = 3;
+  string category_id = 4;
+  double amount = 5;
+  string currency = 6;
+  string type = 7;
+  string description = 8;
+}
+
+message GetBudgetEntryRequest {
+  string entry_id = 1;
+}
+
+message ListBudgetEntriesRequest {
+  string budget_id = 1;
+}
+
+message ActivateBudgetEntryRequest {
+  string entry_id = 1;
+}
+
+message StreamActiveBudgetEntriesRequest {
+  string budget_id = 1;
+}
+
+message BudgetEntryResponse {
+  BudgetEntry entry = 1;
+  string status = 2;
+}
+
+message ListBudgetEntriesResponse {
+  repeated BudgetEntry entries = 1;
+}

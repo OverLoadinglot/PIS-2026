@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: budgetdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  api:
+    image: tiangolo/uvicorn-gunicorn-fastapi:python3.11
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/budgetdb
+    command: uvicorn infrastructure.adapter.in_bound.budget_controller:app --host 0.0.0.0 --port 80
+    depends_on:
+      - db
+
+volumes:
+  db_data:

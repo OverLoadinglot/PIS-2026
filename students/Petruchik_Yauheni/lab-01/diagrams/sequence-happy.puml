@@ -1,0 +1,39 @@
+@startuml sequence-happy
+title Добавление расхода (Happy Path)
+skinparam maxMessageSize 150
+
+actor "Член семьи" as User
+participant "WebApp UI" as UI
+participant "Budget API" as API
+participant "Database" as DB
+participant "Push Service" as Push
+
+User -> UI: Ввод суммы, категории, описания
+activate UI
+
+UI -> API: POST /api/expenses\n(amount, category_id, user_id)
+activate API
+
+API -> DB: SELECT limit, spent FROM categories WHERE id = category_id
+activate DB
+DB --> API: limit_ok (Лимит не превышен)
+deactivate DB
+
+API -> DB: INSERT INTO expenses (amount, ...)
+activate DB
+DB --> API: OK, expense_id
+deactivate DB
+
+API -> API: Обновление кэша баланса
+
+API -> Push: Отправить уведомление семье (асинхронно)
+activate Push
+Push --> API: Очередь принята
+deactivate Push
+
+API --> UI: 201 Created
+deactivate API
+
+UI --> User: "Расход успешно добавлен"
+deactivate UI
+@enduml

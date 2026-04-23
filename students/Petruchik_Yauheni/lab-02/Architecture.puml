@@ -1,0 +1,38 @@
+@startuml Architecture
+title Гексагональная архитектура: Expense Service ("Про рубли")
+skinparam componentStyle rectangle
+
+package "Infrastructure Layer" {
+    [REST API Controller] as API
+    [InMemory Expense Repository] as RepoAdapter
+    [Push Notification Adapter] as PushAdapter
+}
+
+package "Application Layer" {
+    portin "AddExpenseUseCase\nGetExpenseUseCase" as InPorts
+    portout "ExpenseRepository\nNotificationService" as OutPorts
+    [Expense Service] as AppService
+}
+
+package "Domain Layer" {
+    [Expense Entity] as Expense
+    [Category Entity] as Category
+}
+
+' Зависимости: Инфраструктура зависит от Application
+API --> InPorts : Использует (вызов)
+RepoAdapter -.-> OutPorts : Реализует
+PushAdapter -.-> OutPorts : Реализует
+
+' Зависимости: Application зависит от Domain
+AppService ..|> InPorts : Реализует
+AppService --> OutPorts : Вызывает
+AppService --> Expense : Использует
+AppService --> Category : Использует
+
+' Правило зависимостей (Dependency Rule)
+note bottom of "Domain Layer"
+  Domain ничего не знает
+  о внешних слоях!
+end note
+@enduml

@@ -1,0 +1,75 @@
+@startuml
+skinparam componentStyle rectangle
+
+package "Infrastructure Layer" as Infra {
+    [REST Controller (API)] as API
+    [InMemoryFamilyBudgetRepository] as RepoImpl
+    [InMemoryEventBus] as EventBusImpl
+}
+
+package "Application Layer" as App {
+    interface "ManageBudgetUseCase" as InputPort1
+    interface "AddTransactionUseCase" as InputPort2
+    interface "GenerateReportUseCase" as InputPort3
+    interface "FamilyBudgetRepository" as OutputPort1
+    interface "EventBus" as OutputPort2
+    
+    [FamilyBudgetService] as Service
+}
+
+package "Domain Layer" as Domain {
+    [FamilyBudget (Aggregate Root)] as BudgetEntity
+    [FamilyMember (Entity)] as MemberEntity
+    [Category (Entity)] as CategoryEntity
+    [Transaction (Entity)] as TransactionEntity
+    [Money (Value Object)] as MoneyVO
+    [CategoryName (Value Object)] as CategoryVO
+    [DateRange (Value Object)] as DateRangeVO
+    [BudgetReportingService (Domain Service)] as ReportService
+}
+
+' Зависимости снаружи внутрь
+API ..> InputPort1 : "Использует"
+API ..> InputPort2 : "Использует"
+API ..> InputPort3 : "Использует"
+
+RepoImpl ..|> OutputPort1 : "Реализует"
+EventBusImpl ..|> OutputPort2 : "Реализует"
+
+' Связи внутри Application
+Service ..|> InputPort1 : "Реализует"
+Service ..|> InputPort2 : "Реализует"
+Service ..|> InputPort3 : "Реализует"
+
+Service --> OutputPort1 : "Вызывает"
+Service --> OutputPort2 : "Вызывает (публикует события)"
+
+Service --> BudgetEntity : "Манипулирует"
+Service --> ReportService : "Использует"
+
+BudgetEntity --> MemberEntity : "Содержит"
+BudgetEntity --> CategoryEntity : "Содержит"
+BudgetEntity --> TransactionEntity : "Содержит"
+
+TransactionEntity --> MoneyVO : "Использует"
+CategoryEntity --> CategoryVO : "Использует"
+BudgetEntity --> DateRangeVO : "Использует"
+
+' Правило зависимостей (Dependency Rule)
+note bottom of App
+  Application знает только о Domain.
+  Ничего не знает об Infrastructure.
+end note
+
+note bottom of Infra
+  Infrastructure зависит от Application
+  (реализует интерфейсы или вызывает их).
+end note
+
+note right of ReportService
+  Доменный сервис для
+  генерации отчётов
+  (без состояния)
+end note
+
+@enduml
